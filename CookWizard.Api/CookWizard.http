@@ -1,0 +1,6 @@
+@CookWizard_HostAddress = http://localhost:5069
+
+GET {{CookWizard_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
