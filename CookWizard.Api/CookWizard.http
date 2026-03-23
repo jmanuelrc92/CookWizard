@@ -13,25 +13,25 @@ Content-Type: application/json
 
 {
   "category": "desert",
-  "name": "Postre de mango y fresa",
+  "name": "Test pie",
   "portions": 4,
   "preparationTime": {
     "time": 20,
-    "unit": "minutos",
+    "unit": "minutes",
     "timeInSeconds": 1200
   },
   "ingredients": [
     {
       "quantity": 4,
-      "unit": "hojas",
-      "product": "menta",
-      "preparationNotes": "desinfectadas"
+      "unit": "leaves",
+      "product": "mint",
+      "preparationNotes": "desinfected"
     }
   ],
   "preparationSteps": [
     {
       "order": 1,
-      "step": "Licua la mitad de la leche condensada con el mango..."
+      "step": "blend all"
     }
   ]
 }
