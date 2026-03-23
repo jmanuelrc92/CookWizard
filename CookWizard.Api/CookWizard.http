@@ -1,6 +1,39 @@
-@CookWizard_HostAddress = http://localhost:5069
-
 GET {{CookWizard_HostAddress}}/weatherforecast/
 Accept: application/json
+
+###
+
+GET {{CookWizard_HostAddress}}/api/recipes/13c6681f-5140-49ce-b00d-25590275d7c3
+Accept: application/json
+
+###
+
+POST {{CookWizard_HostAddress}}/api/recipes/
+Content-Type: application/json
+
+{
+  "category": "desert",
+  "name": "Postre de mango y fresa",
+  "portions": 4,
+  "preparationTime": {
+    "time": 20,
+    "unit": "minutos",
+    "timeInSeconds": 1200
+  },
+  "ingredients": [
+    {
+      "quantity": 4,
+      "unit": "hojas",
+      "product": "menta",
+      "preparationNotes": "desinfectadas"
+    }
+  ],
+  "preparationSteps": [
+    {
+      "order": 1,
+      "step": "Licua la mitad de la leche condensada con el mango..."
+    }
+  ]
+}
 
 ###

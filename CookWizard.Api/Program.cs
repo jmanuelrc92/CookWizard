@@ -1,4 +1,5 @@
 using CookWizard.Application.Extensions;
+using CookWizard.Infraestructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 //dependency injection
 builder.Services.AddApplication();
+builder.Services.AddInfraestructure();
 
 var app = builder.Build();
 
