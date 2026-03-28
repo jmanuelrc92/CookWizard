@@ -13,7 +13,7 @@ public record CreateRecipeCommand(
     PreparationTimeDTO PreparationTime
 ) : IRequestCustom<Guid>;
 
-public record IngredientDTO(double Quantity, string Unit, string Product, string PreparationNotes);
+public record IngredientDTO(double Quantity, string Unit, string Product, string? PreparationNotes);
 public record PreparationStepDTO(int Order, string Step);
 public record PreparationTimeDTO(int Time, string Unit, int TimeInSeconds);
 

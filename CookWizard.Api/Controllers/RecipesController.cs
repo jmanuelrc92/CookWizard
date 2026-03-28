@@ -1,6 +1,7 @@
 ﻿using CookWizard.Application.Common;
 using CookWizard.Application.Features.Recipes.Commands.CreateRecipe;
 using CookWizard.Application.Features.Recipes.Queries.GetRecipeById;
+using CookWizard.Application.Features.Recipes.Queries.GetRecipesByIngredient;
 using CookWizard.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +18,7 @@ public class RecipesController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpPost(Name = "create")]
+    [HttpPost("create")]
     public async Task<ActionResult<Guid>> Create(CreateRecipeCommand command)
     {
         var result = await _mediator.SendAsync(command);
@@ -32,6 +33,15 @@ public class RecipesController : ControllerBase
 
         if (result == null)
             return NotFound(new { Message = $"No se encontró la receta con ID: {id}" });
+
+        return Ok(result);
+    }
+
+    [HttpPost("searchwith")]
+    public async Task<ActionResult<IEnumerable<Recipe>>> GetRecipesByIngredients([FromBody]List<string> products)
+    {
+        var query = new GetRecipesByIngredientsQuery(products);
+        var result = await _mediator.SendAsync(query);
 
         return Ok(result);
     }

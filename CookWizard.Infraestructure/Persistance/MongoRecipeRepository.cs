@@ -26,4 +26,16 @@ public class MongoRecipeRepository : IRecipeRepository
     {
         return await _recipes.Find(r => r.Id == id).FirstOrDefaultAsync();
     }
+
+    public async Task<IEnumerable<Recipe>> SearchByIngredientAsync(List<string> products)
+    {
+        // Filtro: Busca recetas donde al menos un ingrediente tenga un "Product" 
+        // que esté en nuestra lista de productos proporcionada.
+        var filter = Builders<Recipe>.Filter.ElemMatch(
+            r => r.Ingredients,
+            i => products.Contains(i.Product)
+        );
+
+        return await _recipes.Find(filter).ToListAsync();
+    }
 }
