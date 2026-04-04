@@ -27,6 +27,19 @@ public class MongoRecipeRepository : IRecipeRepository
         return await _recipes.Find(r => r.Id == id).FirstOrDefaultAsync();
     }
 
+    public async Task<(IEnumerable<Recipe> Items, long Total)> GetRecipes(int pageNumber, int pageSize)
+    {
+        var filter = Builders<Recipe>.Filter.Empty;
+        var totalTask = _recipes.CountDocumentsAsync(filter);
+        var itemTask = _recipes.Find(filter)
+            .Skip((pageNumber - 1) * pageSize)
+            .Limit(pageSize)
+            .ToListAsync();
+        await Task.WhenAll(totalTask, itemTask);
+
+        return (itemTask.Result, totalTask.Result);
+    }
+
     public async Task<IEnumerable<Recipe>> SearchByIngredientAsync(List<string> products)
     {
         // Filtro: Busca recetas donde al menos un ingrediente tenga un "Product" 

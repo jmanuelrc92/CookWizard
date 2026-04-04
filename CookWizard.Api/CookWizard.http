@@ -1,4 +1,4 @@
-GET {{CookWizard_HostAddress}}/weatherforecast/
+GET {{CookWizard_HostAddress}}/api/recipes/
 Accept: application/json
 
 ###
@@ -8,7 +8,7 @@ Accept: application/json
 
 ###
 
-POST {{CookWizard_HostAddress}}/api/recipes/
+POST {{CookWizard_HostAddress}}/api/recipes/create
 Content-Type: application/json
 
 {

@@ -1,6 +1,7 @@
 ﻿using CookWizard.Application.Common;
 using CookWizard.Application.Features.Recipes.Commands.CreateRecipe;
 using CookWizard.Application.Features.Recipes.Queries.GetRecipeById;
+using CookWizard.Application.Features.Recipes.Queries.GetRecipes;
 using CookWizard.Application.Features.Recipes.Queries.GetRecipesByIngredient;
 using CookWizard.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -25,6 +26,12 @@ public class RecipesController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet]
+    public async Task<ActionResult<PagedResult<Recipe>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    {
+        var query = new GetRecipesQuery(pageNumber, pageSize);
+        var result = await _mediator.SendAsync(query);
+        return Ok(result);
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<Recipe>> GetById(Guid id)
     {
