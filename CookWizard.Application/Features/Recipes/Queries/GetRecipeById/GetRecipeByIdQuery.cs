@@ -3,9 +3,9 @@ using CookWizard.Domain.Entities;
 using CookWizard.Domain.Interfaces;
 
 namespace CookWizard.Application.Features.Recipes.Queries.GetRecipeById;
-public record GetRecipeByIdQuery(Guid Id) : IRequestCustom<Recipe>;
+public record GetRecipeByIdQuery(Guid Id) : IRequestCustom<CookWizardApiResult<Recipe>>;
 
-public class GetRecipeByIdHandler : IRequestHandlerCustom<GetRecipeByIdQuery, Recipe?>
+public class GetRecipeByIdHandler : IRequestHandlerCustom<GetRecipeByIdQuery, CookWizardApiResult<Recipe>>
 {
     private readonly IRecipeRepository _repository;
 
@@ -14,8 +14,13 @@ public class GetRecipeByIdHandler : IRequestHandlerCustom<GetRecipeByIdQuery, Re
         _repository = repository;
     }
 
-    public async Task<Recipe?> HandleAsync(GetRecipeByIdQuery request, CancellationToken cancellationToken = default)
+    public async Task<CookWizardApiResult<Recipe>> HandleAsync(GetRecipeByIdQuery request, CancellationToken cancellationToken = default)
     {
-        return await _repository.GetByIdAsync(request.Id);
+        var recipe = await _repository.GetByIdAsync(request.Id);
+        if (recipe == null)
+        {
+            return CookWizardApiResult<Recipe>.Failure($"La receta con ID { request.Id } no existe.");
+        }
+        return CookWizardApiResult<Recipe>.Success(recipe);
     }
 }

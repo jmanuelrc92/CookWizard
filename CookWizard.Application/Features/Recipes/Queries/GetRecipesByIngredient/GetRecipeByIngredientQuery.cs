@@ -4,10 +4,10 @@ using CookWizard.Domain.Interfaces;
 
 namespace CookWizard.Application.Features.Recipes.Queries.GetRecipesByIngredient;
 
-public record GetRecipesByIngredientsQuery(List<string> products) : IRequestCustom<IEnumerable<Recipe>>;
+public record GetRecipesByIngredientsQuery(List<string> products) : IRequestCustom<CookWizardApiResult<IEnumerable<Recipe>>>;
 
 public class GetRecipesByIngredientsHandler
-    : IRequestHandlerCustom<GetRecipesByIngredientsQuery, IEnumerable<Recipe>>
+    : IRequestHandlerCustom<GetRecipesByIngredientsQuery, CookWizardApiResult<IEnumerable<Recipe>>>
 {
     private readonly IRecipeRepository _repository;
 
@@ -16,13 +16,19 @@ public class GetRecipesByIngredientsHandler
         _repository = repository;
     }
 
-    public async Task<IEnumerable<Recipe>> HandleAsync(
+    public async Task<CookWizardApiResult<IEnumerable<Recipe>>> HandleAsync(
         GetRecipesByIngredientsQuery request,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         if (request.products == null || !request.products.Any())
-            return Enumerable.Empty<Recipe>();
+            return CookWizardApiResult<IEnumerable<Recipe>>.Failure("Se necesita al menos un ingrediente");
 
-        return await _repository.SearchByIngredientAsync(request.products);
+        var foundRecipes = await _repository.SearchByIngredientAsync(request.products);
+
+        if (!foundRecipes.Any())
+            return CookWizardApiResult<IEnumerable<Recipe>>.Failure("No existen recetas con esos ingredientes");
+
+        return CookWizardApiResult<IEnumerable<Recipe>>.Success(foundRecipes);
     }
 }

@@ -5,15 +5,15 @@ using CookWizard.Domain.Interfaces;
 namespace CookWizard.Application.Features.Recipes.Queries.GetRecipes;
 public record PagedResult<T>(IEnumerable<T> Items, int PageNumber, int PageSize, long TotalItems);
 
-public record GetRecipesQuery(int PageNumber, int PageSize) : IRequestCustom<PagedResult<Recipe>>;
+public record GetRecipesQuery(int PageNumber, int PageSize) : IRequestCustom<CookWizardApiResult<PagedResult<Recipe>>>;
 
-public class GetRecipesHandler : IRequestHandlerCustom<GetRecipesQuery, PagedResult<Recipe>>
+public class GetRecipesHandler : IRequestHandlerCustom<GetRecipesQuery, CookWizardApiResult<PagedResult<Recipe>>>
 {
     private readonly IRecipeRepository _repository;
 
     public GetRecipesHandler(IRecipeRepository repository) => _repository = repository;
 
-    public async Task<PagedResult<Recipe>> HandleAsync(GetRecipesQuery request, CancellationToken ct)
+    public async Task<CookWizardApiResult<PagedResult<Recipe>>> HandleAsync(GetRecipesQuery request, CancellationToken ct)
     {
         // Validaciones básicas
         var page = request.PageNumber <= 0 ? 1 : request.PageNumber;
@@ -21,6 +21,11 @@ public class GetRecipesHandler : IRequestHandlerCustom<GetRecipesQuery, PagedRes
 
         var (items, total) = await _repository.GetRecipes(page, size);
 
-        return new PagedResult<Recipe>(items, page, size, total);
+        if (!items.Any())
+            return CookWizardApiResult<PagedResult<Recipe>>.Failure("No existen recetas");
+
+        return CookWizardApiResult<PagedResult<Recipe>>.Success(
+            new PagedResult<Recipe>(items, page, size, total)
+        );
     }
 }

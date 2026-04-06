@@ -8,9 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CookWizard.Api.Controllers;
 
-[ApiController]
 [Route("api/[controller]")]
-public class RecipesController : ControllerBase
+public class RecipesController : ApiController
 {
     private readonly IMediatorCustom _mediator;
 
@@ -23,7 +22,7 @@ public class RecipesController : ControllerBase
     public async Task<ActionResult<Guid>> Create(CreateRecipeCommand command)
     {
         var result = await _mediator.SendAsync(command);
-        return Ok(result);
+        return HandleResult<Guid>(result);
     }
 
     [HttpGet]
@@ -31,17 +30,16 @@ public class RecipesController : ControllerBase
     {
         var query = new GetRecipesQuery(pageNumber, pageSize);
         var result = await _mediator.SendAsync(query);
-        return Ok(result);
+        return HandleResult<PagedResult<Recipe>>(result);
+    }
+
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<Recipe>> GetById(Guid id)
+    public async Task<ActionResult<Recipe>> GetRecipe(Guid id)
     {
         var query = new GetRecipeByIdQuery(id);
         var result = await _mediator.SendAsync(query);
 
-        if (result == null)
-            return NotFound(new { Message = $"No se encontró la receta con ID: {id}" });
-
-        return Ok(result);
+        return HandleResult(result);
     }
 
     [HttpPost("searchwith")]
@@ -50,7 +48,7 @@ public class RecipesController : ControllerBase
         var query = new GetRecipesByIngredientsQuery(products);
         var result = await _mediator.SendAsync(query);
 
-        return Ok(result);
+        return HandleResult<IEnumerable<Recipe>>(result);
     }
 
 }

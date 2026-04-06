@@ -11,13 +11,13 @@ public record CreateRecipeCommand(
     List<IngredientDTO> Ingredients,
     List<PreparationStepDTO> PreparationSteps,
     PreparationTimeDTO PreparationTime
-) : IRequestCustom<Guid>;
+) : IRequestCustom<CookWizardApiResult<Guid>>;
 
 public record IngredientDTO(double Quantity, string Unit, string Product, string? PreparationNotes);
 public record PreparationStepDTO(int Order, string Step);
 public record PreparationTimeDTO(int Time, string Unit, int TimeInSeconds);
 
-public class CreateRecipeHandler : IRequestHandlerCustom<CreateRecipeCommand, Guid>
+public class CreateRecipeHandler : IRequestHandlerCustom<CreateRecipeCommand, CookWizardApiResult<Guid>>
 {
     private readonly IRecipeRepository _recipeRepository;
     public CreateRecipeHandler(IRecipeRepository recipeRepository)
@@ -25,17 +25,17 @@ public class CreateRecipeHandler : IRequestHandlerCustom<CreateRecipeCommand, Gu
         _recipeRepository = recipeRepository;
     }
 
-    public async Task<Guid> HandleAsync(CreateRecipeCommand request, CancellationToken cancellationToken)
+    public async Task<CookWizardApiResult<Guid>> HandleAsync(CreateRecipeCommand request, CancellationToken cancellationToken)
     {
         // --- 1. Validaciones de Negocio ---
         if (request.Portions <= 0)
-            throw new ArgumentException("Las porciones deben ser mayores a cero.");
+            return CookWizardApiResult<Guid>.Failure("Las porciones deben ser mayores a cero.");
 
         if (request.PreparationTime.Time < 0)
-            throw new ArgumentException("El tiempo de preparación no puede ser negativo.");
+            return CookWizardApiResult<Guid>.Failure("El tiempo de preparación no puede ser negativo.");
 
         if (!request.Ingredients.Any())
-            throw new ArgumentException("La receta debe tener al menos un ingrediente.");
+            return CookWizardApiResult<Guid>.Failure("La receta debe tener al menos un ingrediente.");
 
         // Mapping
         var newRecipe = new Recipe
@@ -66,6 +66,7 @@ public class CreateRecipeHandler : IRequestHandlerCustom<CreateRecipeCommand, Gu
         };
 
         //Persistance
-        return await _recipeRepository.CreateAsync(newRecipe);
+        var createdRecipe = await _recipeRepository.CreateAsync(newRecipe);
+        return CookWizardApiResult<Guid>.Success(createdRecipe);
     }
 }
