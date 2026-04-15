@@ -2,7 +2,7 @@
 using CookWizard.Domain.Entities;
 using CookWizard.Domain.Interfaces;
 
-namespace CookWizard.Application.Features.Recipes.Queries.GetRecipes;
+namespace CookWizard.Application.Features.Recipes.Queries;
 public record PagedResult<T>(IEnumerable<T> Items, int PageNumber, int PageSize, long TotalItems);
 
 public record GetRecipesQuery(int PageNumber, int PageSize) : IRequestCustom<CookWizardApiResult<PagedResult<Recipe>>>;

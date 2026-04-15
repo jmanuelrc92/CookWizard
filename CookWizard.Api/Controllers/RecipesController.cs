@@ -1,8 +1,6 @@
 ﻿using CookWizard.Application.Common;
-using CookWizard.Application.Features.Recipes.Commands.CreateRecipe;
-using CookWizard.Application.Features.Recipes.Queries.GetRecipeById;
-using CookWizard.Application.Features.Recipes.Queries.GetRecipes;
-using CookWizard.Application.Features.Recipes.Queries.GetRecipesByIngredient;
+using CookWizard.Application.Features.Recipes.Commands;
+using CookWizard.Application.Features.Recipes.Queries;
 using CookWizard.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 

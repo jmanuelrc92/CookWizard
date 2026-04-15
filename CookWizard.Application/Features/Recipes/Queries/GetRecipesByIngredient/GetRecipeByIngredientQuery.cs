@@ -2,7 +2,7 @@
 using CookWizard.Domain.Entities;
 using CookWizard.Domain.Interfaces;
 
-namespace CookWizard.Application.Features.Recipes.Queries.GetRecipesByIngredient;
+namespace CookWizard.Application.Features.Recipes.Queries;
 
 public record GetRecipesByIngredientsQuery(List<string> products) : IRequestCustom<CookWizardApiResult<IEnumerable<Recipe>>>;
 

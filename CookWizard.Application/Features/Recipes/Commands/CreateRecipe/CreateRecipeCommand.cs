@@ -2,7 +2,7 @@
 using CookWizard.Domain.Entities;
 using CookWizard.Domain.Interfaces;
 
-namespace CookWizard.Application.Features.Recipes.Commands.CreateRecipe;
+namespace CookWizard.Application.Features.Recipes.Commands;
 
 public record CreateRecipeCommand(
     string Name,

@@ -2,7 +2,7 @@
 using CookWizard.Domain.Entities;
 using CookWizard.Domain.Interfaces;
 
-namespace CookWizard.Application.Features.Recipes.Queries.GetRecipeById;
+namespace CookWizard.Application.Features.Recipes.Queries;
 public record GetRecipeByIdQuery(Guid Id) : IRequestCustom<CookWizardApiResult<Recipe>>;
 
 public class GetRecipeByIdHandler : IRequestHandlerCustom<GetRecipeByIdQuery, CookWizardApiResult<Recipe>>
