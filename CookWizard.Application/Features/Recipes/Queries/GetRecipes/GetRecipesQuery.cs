@@ -1,19 +1,34 @@
 ﻿using CookWizard.Application.Common;
+using CookWizard.Application.Common.DTOs;
 using CookWizard.Domain.Entities;
 using CookWizard.Domain.Interfaces;
+using MapsterMapper;
+using MediatR;
 
 namespace CookWizard.Application.Features.Recipes.Queries;
-public record PagedResult<T>(IEnumerable<T> Items, int PageNumber, int PageSize, long TotalItems);
 
-public record GetRecipesQuery(int PageNumber, int PageSize) : IRequestCustom<CookWizardApiResult<PagedResult<Recipe>>>;
+public record PagedResult<T>(
+    IEnumerable<T> Items,
+    int PageNumber,
+    int PageSize,
+    long TotalItems,
+    int TotalPages
+);
 
-public class GetRecipesHandler : IRequestHandlerCustom<GetRecipesQuery, CookWizardApiResult<PagedResult<Recipe>>>
+public record GetRecipesQuery(int PageNumber, int PageSize) : IRequest<ResultObject<PagedResult<RecipeDTO>>>;
+
+public class GetRecipesHandler : IRequestHandler<GetRecipesQuery, ResultObject<PagedResult<RecipeDTO>>>
 {
     private readonly IRecipeRepository _repository;
+    private readonly IMapper _mapper;
 
-    public GetRecipesHandler(IRecipeRepository repository) => _repository = repository;
+    public GetRecipesHandler(IRecipeRepository repository, IMapper mapper)
+    {
+        _mapper = mapper;
+        _repository = repository;
+    }
 
-    public async Task<CookWizardApiResult<PagedResult<Recipe>>> HandleAsync(GetRecipesQuery request, CancellationToken ct)
+    public async Task<ResultObject<PagedResult<RecipeDTO>>> Handle(GetRecipesQuery request, CancellationToken ct)
     {
         // Validaciones básicas
         var page = request.PageNumber <= 0 ? 1 : request.PageNumber;
@@ -22,10 +37,12 @@ public class GetRecipesHandler : IRequestHandlerCustom<GetRecipesQuery, CookWiza
         var (items, total) = await _repository.GetRecipes(page, size);
 
         if (!items.Any())
-            return CookWizardApiResult<PagedResult<Recipe>>.Failure("No existen recetas");
+            return ResultObject<PagedResult<RecipeDTO>>.Failure("No existen recetas");
 
-        return CookWizardApiResult<PagedResult<Recipe>>.Success(
-            new PagedResult<Recipe>(items, page, size, total)
+        var dtoItems = _mapper.Map<IEnumerable<RecipeDTO>>(items);
+
+        return ResultObject<PagedResult<RecipeDTO>>.Success(
+            new PagedResult<RecipeDTO>(dtoItems, page, size, total, 0)
         );
     }
 }

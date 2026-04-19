@@ -1,6 +1,7 @@
 ﻿using CookWizard.Domain.Entities;
 using CookWizard.Domain.Interfaces;
-using Microsoft.Extensions.Configuration;
+using CookWizard.Infrastructure.Common.Settings;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace CookWizard.Infraestructure.Persistance;
@@ -8,47 +9,72 @@ namespace CookWizard.Infraestructure.Persistance;
 public class MongoRecipeRepository : IRecipeRepository
 {
     private readonly IMongoCollection<Recipe> _recipes;
+    private readonly MongoSettings _options;
 
-    public MongoRecipeRepository(IConfiguration configuration)
+    public MongoRecipeRepository(IOptions<MongoSettings> options)
     {
-        var client = new MongoClient(configuration.GetConnectionString("MongoDb"));
-        var database = client.GetDatabase("CookWizardDb");
-        _recipes = database.GetCollection<Recipe>("Recipes");
+        _options = options.Value;
+
+        this._recipes = this._ConfigureServerConnection()
+            .GetCollection<Recipe>("Recipes");
     }
 
-    public async Task<Guid> CreateAsync(Recipe recipe)
+    private IMongoDatabase _ConfigureServerConnection()
+    {
+        var connectionString = $"mongodb://{_options.User}:{_options.Password}@localhost:{_options.Port}/myDatabase";
+        var client = new MongoClient(connectionString);
+        
+        return client.GetDatabase("CookWizardDb");
+    }
+
+    public async Task<string> CreateAsync(Recipe recipe)
     {
         await _recipes.InsertOneAsync(recipe);
         return recipe.Id;
     }
 
-    public async Task<Recipe?> GetByIdAsync(Guid id)
+    public async Task<Recipe?> GetByIdAsync(string id)
     {
         return await _recipes.Find(r => r.Id == id).FirstOrDefaultAsync();
     }
 
     public async Task<(IEnumerable<Recipe> Items, long Total)> GetRecipes(int pageNumber, int pageSize)
     {
+        if (pageNumber <= 0) pageNumber = 1;
+        if (pageSize <= 0) pageSize = 10;
+
         var filter = Builders<Recipe>.Filter.Empty;
+
         var totalTask = _recipes.CountDocumentsAsync(filter);
-        var itemTask = _recipes.Find(filter)
+        var itemsTask = _recipes.Find(filter)
             .Skip((pageNumber - 1) * pageSize)
             .Limit(pageSize)
             .ToListAsync();
-        await Task.WhenAll(totalTask, itemTask);
 
-        return (itemTask.Result, totalTask.Result);
+        await Task.WhenAll(totalTask, itemsTask);
+
+        return (itemsTask.Result, totalTask.Result);
     }
 
     public async Task<IEnumerable<Recipe>> SearchByIngredientAsync(List<string> products)
     {
-        // Filtro: Busca recetas donde al menos un ingrediente tenga un "Product" 
-        // que esté en nuestra lista de productos proporcionada.
+        var normalized = products.Select(p => p.ToLower()).ToList();
+
         var filter = Builders<Recipe>.Filter.ElemMatch(
-            r => r.Ingredients,
-            i => products.Contains(i.Product)
+            r => r.Sections,
+            s => s.Ingredients.Any(i => normalized.Contains(i.Product))
         );
 
         return await _recipes.Find(filter).ToListAsync();
+    }
+
+    public async Task UpdateAsync(Recipe recipe)
+    {
+        await _recipes.ReplaceOneAsync(r => r.Id == recipe.Id, recipe);
+    }
+
+    public async Task DeleteAsync(string id)
+    {
+        await _recipes.DeleteOneAsync(r => r.Id == id);
     }
 }

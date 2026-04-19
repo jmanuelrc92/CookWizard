@@ -9,7 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 //dependency injection
 builder.Services.AddApplication();
-builder.Services.AddInfraestructure();
+builder.Services.AddInfraestructure(builder.Configuration);
 
 builder.Services.AddCors(options =>
 {

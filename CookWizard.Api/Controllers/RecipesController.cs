@@ -1,7 +1,7 @@
-﻿using CookWizard.Application.Common;
+﻿using CookWizard.Application.Common.DTOs;
 using CookWizard.Application.Features.Recipes.Commands;
 using CookWizard.Application.Features.Recipes.Queries;
-using CookWizard.Domain.Entities;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CookWizard.Api.Controllers;
@@ -9,44 +9,44 @@ namespace CookWizard.Api.Controllers;
 [Route("api/[controller]")]
 public class RecipesController : ApiController
 {
-    private readonly IMediatorCustom _mediator;
+    private readonly IMediator _mediator;
 
-    public RecipesController(IMediatorCustom mediator)
+    public RecipesController(IMediator mediator)
     {
         _mediator = mediator;
     }
 
-    [HttpPost("create")]
+    [HttpPost]
     public async Task<ActionResult<Guid>> Create(CreateRecipeCommand command)
     {
-        var result = await _mediator.SendAsync(command);
-        return HandleResult<Guid>(result);
+        var result = await _mediator.Send(command);
+        return HandleResult<string>(result);
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedResult<Recipe>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<PagedResult<RecipeDTO>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var query = new GetRecipesQuery(pageNumber, pageSize);
-        var result = await _mediator.SendAsync(query);
-        return HandleResult<PagedResult<Recipe>>(result);
+        var result = await _mediator.Send(query);
+        return HandleResult<PagedResult<RecipeDTO>>(result);
     }
 
-    [HttpGet("{id:guid}")]
-    public async Task<ActionResult<Recipe>> GetRecipe(Guid id)
+    [HttpGet("{id}")]
+    public async Task<ActionResult<RecipeDTO>> GetRecipe(string id)
     {
         var query = new GetRecipeByIdQuery(id);
-        var result = await _mediator.SendAsync(query);
+        var result = await _mediator.Send(query);
 
         return HandleResult(result);
     }
 
-    [HttpPost("searchwith")]
-    public async Task<ActionResult<IEnumerable<Recipe>>> GetRecipesByIngredients([FromBody]List<string> products)
+    [HttpGet("search")]
+    public async Task<ActionResult<IEnumerable<RecipeDTO>>> GetRecipesByIngredients([FromBody]List<string> ingredients)
     {
-        var query = new GetRecipesByIngredientsQuery(products);
-        var result = await _mediator.SendAsync(query);
+        var query = new GetRecipesByIngredientsQuery(ingredients);
+        var result = await _mediator.Send(query);
 
-        return HandleResult<IEnumerable<Recipe>>(result);
+        return HandleResult<IEnumerable<RecipeDTO>>(result);
     }
 
 }

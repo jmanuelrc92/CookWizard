@@ -2,5 +2,5 @@
   <Project Path="CookWizard.Api/CookWizard.Api.csproj" />
   <Project Path="CookWizard.Application/CookWizard.Application.csproj" />
   <Project Path="CookWizard.Domain/CookWizard.Domain.csproj" />
-  <Project Path="CookWizard.Infraestructure/CookWizard.Infraestructure.csproj" />
+  <Project Path="CookWizard.Infraestructure/CookWizard.Infrastructure.csproj" />
 </Solution>

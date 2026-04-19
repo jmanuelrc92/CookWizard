@@ -1,26 +1,32 @@
 ﻿using CookWizard.Application.Common;
+using CookWizard.Application.Common.DTOs;
 using CookWizard.Domain.Entities;
 using CookWizard.Domain.Interfaces;
+using MapsterMapper;
+using MediatR;
 
 namespace CookWizard.Application.Features.Recipes.Queries;
-public record GetRecipeByIdQuery(Guid Id) : IRequestCustom<CookWizardApiResult<Recipe>>;
+public record GetRecipeByIdQuery(string Id) : IRequest<ResultObject<RecipeDTO>>;
 
-public class GetRecipeByIdHandler : IRequestHandlerCustom<GetRecipeByIdQuery, CookWizardApiResult<Recipe>>
+public class GetRecipeByIdHandler : IRequestHandler<GetRecipeByIdQuery, ResultObject<RecipeDTO>>
 {
     private readonly IRecipeRepository _repository;
+    private readonly IMapper _mapper;
 
-    public GetRecipeByIdHandler(IRecipeRepository repository)
+    public GetRecipeByIdHandler(IRecipeRepository repository, IMapper mapper)
     {
         _repository = repository;
+        _mapper = mapper;
     }
 
-    public async Task<CookWizardApiResult<Recipe>> HandleAsync(GetRecipeByIdQuery request, CancellationToken cancellationToken = default)
+    public async Task<ResultObject<RecipeDTO>> Handle(GetRecipeByIdQuery request, CancellationToken cancellationToken = default)
     {
         var recipe = await _repository.GetByIdAsync(request.Id);
         if (recipe == null)
         {
-            return CookWizardApiResult<Recipe>.Failure($"La receta con ID { request.Id } no existe.");
+            return ResultObject<RecipeDTO>.Failure($"La receta con ID { request.Id } no existe.");
         }
-        return CookWizardApiResult<Recipe>.Success(recipe);
+        var recipeDTO = _mapper.Map<RecipeDTO>(recipe);
+        return ResultObject<RecipeDTO>.Success(recipeDTO);
     }
 }

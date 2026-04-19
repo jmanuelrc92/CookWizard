@@ -1,72 +1,99 @@
 ﻿using CookWizard.Application.Common;
 using CookWizard.Domain.Entities;
 using CookWizard.Domain.Interfaces;
+using MediatR;
 
 namespace CookWizard.Application.Features.Recipes.Commands;
 
 public record CreateRecipeCommand(
     string Name,
     int Portions,
-    string Category,
+    int TotalTimeInSeconds,
+    List<SectionDTO> Sections
+) : IRequest<ResultObject<string>>;
+public record IngredientDTO(
+    decimal Quantity,
+    string Unit,
+    string Product,
+    string? Notes,
+    string? Raw
+);
+public record PreparationStepDTO(string Description);
+public record SectionDTO(
+    string Name,
     List<IngredientDTO> Ingredients,
-    List<PreparationStepDTO> PreparationSteps,
-    PreparationTimeDTO PreparationTime
-) : IRequestCustom<CookWizardApiResult<Guid>>;
+    List<PreparationStepDTO> Steps
+);
 
-public record IngredientDTO(double Quantity, string Unit, string Product, string? PreparationNotes);
-public record PreparationStepDTO(int Order, string Step);
-public record PreparationTimeDTO(int Time, string Unit, int TimeInSeconds);
-
-public class CreateRecipeHandler : IRequestHandlerCustom<CreateRecipeCommand, CookWizardApiResult<Guid>>
+public class CreateRecipeHandler : IRequestHandler<CreateRecipeCommand, ResultObject<string>>
 {
     private readonly IRecipeRepository _recipeRepository;
+
     public CreateRecipeHandler(IRecipeRepository recipeRepository)
     {
-        _recipeRepository = recipeRepository;
+        this._recipeRepository = recipeRepository;
     }
 
-    public async Task<CookWizardApiResult<Guid>> HandleAsync(CreateRecipeCommand request, CancellationToken cancellationToken)
+    public async Task<ResultObject<string>> Handle(CreateRecipeCommand request, CancellationToken cancellationToken)
     {
-        // --- 1. Validaciones de Negocio ---
+        // --- Validaciones ---
+        if (string.IsNullOrWhiteSpace(request.Name))
+            return ResultObject<string>.Failure("El nombre es requerido");
+
         if (request.Portions <= 0)
-            return CookWizardApiResult<Guid>.Failure("Las porciones deben ser mayores a cero.");
+            return ResultObject<string>.Failure("Las porciones deben ser mayores a cero");
 
-        if (request.PreparationTime.Time < 0)
-            return CookWizardApiResult<Guid>.Failure("El tiempo de preparación no puede ser negativo.");
+        if (request.TotalTimeInSeconds < 0)
+            return ResultObject<string>.Failure("El tiempo no puede ser negativo");
 
-        if (!request.Ingredients.Any())
-            return CookWizardApiResult<Guid>.Failure("La receta debe tener al menos un ingrediente.");
+        if (request.Sections == null || !request.Sections.Any())
+            return ResultObject<string>.Failure("Debe haber al menos una sección");
 
-        // Mapping
-        var newRecipe = new Recipe
+        if (request.Sections.Any(s => s.Ingredients == null || !s.Ingredients.Any()))
+            return ResultObject<string>.Failure("Cada sección debe tener ingredientes");
+
+        // --- Crear entidad usando dominio ---
+        var recipe = new Recipe(
+            request.Name,
+            request.Portions,
+            request.TotalTimeInSeconds,
+            Difficulty.Easy // puedes mapear luego
+        );
+
+        foreach (var sectionDto in request.Sections)
         {
-            Id = Guid.NewGuid(),
-            Name = request.Name,
-            Category = request.Category,
-            Portions = request.Portions,
-            PreparationTime = new PreparationTime
-            {
-                Time = request.PreparationTime.Time,
-                Unit = request.PreparationTime.Unit,
-                TimeInSeconds = request.PreparationTime.TimeInSeconds
-            },
-            // Mapeo de listas anidadas
-            Ingredients = request.Ingredients.Select(i => new Ingredient
-            {
-                Quantity = i.Quantity,
-                Unit = i.Unit,
-                Product = i.Product,
-                PreparationNotes = i.PreparationNotes
-            }).ToList(),
-            PreparationSteps = request.PreparationSteps.Select(p => new PreparationStep
-            {
-                Order = p.Order,
-                Step = p.Step
-            }).OrderBy(p => p.Order).ToList() // Aseguramos el orden de los pasos
-        };
+            var section = new Section(sectionDto.Name);
 
-        //Persistance
-        var createdRecipe = await _recipeRepository.CreateAsync(newRecipe);
-        return CookWizardApiResult<Guid>.Success(createdRecipe);
+            // Ingredientes
+            foreach (var ing in sectionDto.Ingredients)
+            {
+                var ingredient = new Ingredient(
+                    ing.Quantity,
+                    ing.Product,
+                    Domain.Entities.Unit.Gram // Aquí deberías mapear el string a tu enum de unidades
+                );
+
+                if (!string.IsNullOrWhiteSpace(ing.Notes))
+                    ingredient.AddNotes(ing.Notes);
+
+                if (!string.IsNullOrWhiteSpace(ing.Raw))
+                    ingredient.AddRaw(ing.Raw);
+
+                section.AddIngredient(ingredient);
+            }
+
+            // Steps (sin order)
+            foreach (var stepDto in sectionDto.Steps)
+            {
+                section.AddStep(stepDto.Description);
+            }
+
+            recipe.AddSection(section);
+        }
+
+        // --- Persistencia ---
+        var id = await _recipeRepository.CreateAsync(recipe);
+
+        return ResultObject<string>.Success(id);
     }
 }

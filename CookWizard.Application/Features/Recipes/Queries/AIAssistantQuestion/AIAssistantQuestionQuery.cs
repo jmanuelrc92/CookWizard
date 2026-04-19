@@ -1,13 +1,14 @@
 ﻿using CookWizard.Application.Common;
 using CookWizard.Domain.Entities;
 using CookWizard.Domain.Interfaces;
+using MediatR;
 
 namespace CookWizard.Application.Features.Recipes.Queries;
 
 // La petición: una simple pregunta en texto
-public record AIAssistantQuestionQuery(string question) : IRequestCustom<CookWizardApiResult<string>>;
+public record AIAssistantQuestionQuery(string question) : IRequest<ResultObject<string>>;
 
-public class AIAssistantQuestionHandler : IRequestHandlerCustom<AIAssistantQuestionQuery, CookWizardApiResult<string>>
+public class AIAssistantQuestionHandler : IRequestHandler<AIAssistantQuestionQuery, ResultObject<string>>
 {
     private readonly IRecipeRepository _repository;
 
@@ -16,10 +17,10 @@ public class AIAssistantQuestionHandler : IRequestHandlerCustom<AIAssistantQuest
         _repository = repository;
     }
 
-    public async Task<CookWizardApiResult<string>> HandleAsync(AIAssistantQuestionQuery request, CancellationToken ct)
+    public async Task<ResultObject<string>> Handle(AIAssistantQuestionQuery request, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(request.question))
-            return CookWizardApiResult<string>.Failure("La pregunta no puede estar vacía.");
+            return ResultObject<string>.Failure("La pregunta no puede estar vacía.");
 
         // --- Lógica del Asistente ---
         // 1. (IA / Lógica simple) Extraemos los ingredientes clave de la pregunta.
@@ -27,7 +28,7 @@ public class AIAssistantQuestionHandler : IRequestHandlerCustom<AIAssistantQuest
         var keyIngredients = ExtractIngredientsFromText(request.question);
 
         if (!keyIngredients.Any())
-            return CookWizardApiResult<string>.Success("¡Hola! ¿Qué ingredientes tienes o qué tipo de comida te gustaría preparar?");
+            return ResultObject<string>.Success("¡Hola! ¿Qué ingredientes tienes o qué tipo de comida te gustaría preparar?");
 
         // 2. Usamos nuestra Query existente para buscar en MongoDB.
         var recipes = await _repository.SearchByIngredientAsync(keyIngredients);
@@ -35,7 +36,7 @@ public class AIAssistantQuestionHandler : IRequestHandlerCustom<AIAssistantQuest
         // 3. Formateamos la respuesta del Asistente (esto es lo que dirá la IA).
         var formatedAnswer = FormatAnswer(keyIngredients, recipes);
 
-        return CookWizardApiResult<string>.Success(formatedAnswer);
+        return ResultObject<string>.Success(formatedAnswer);
     }
 
     // --- Lógica de Ayuda (Helper Methods) ---

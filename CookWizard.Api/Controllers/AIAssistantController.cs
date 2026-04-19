@@ -1,5 +1,5 @@
-﻿using CookWizard.Application.Common;
-using CookWizard.Application.Features.Recipes.Queries;
+﻿using CookWizard.Application.Features.Recipes.Queries;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CookWizard.Api.Controllers;
@@ -7,9 +7,9 @@ namespace CookWizard.Api.Controllers;
 [Route("api/[controller]")]
 public class AIAssistantController : ApiController
 {
-    private readonly IMediatorCustom _mediator;
+    private readonly IMediator _mediator;
 
-    public AIAssistantController(IMediatorCustom mediator)
+    public AIAssistantController(IMediator mediator)
     {
         _mediator = mediator;
     }
@@ -17,7 +17,7 @@ public class AIAssistantController : ApiController
     [HttpPost("question")]
     public async Task<ActionResult> Question(string question)
     {
-        var result = await _mediator.SendAsync(new AIAssistantQuestionQuery(question));
+        var result = await _mediator.Send(new AIAssistantQuestionQuery(question));
         return HandleResult(result);
     }
 }
