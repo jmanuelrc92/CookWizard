@@ -1,7 +1,6 @@
 ﻿using CookWizard.Application.Common;
 using CookWizard.Application.Common.DTOs;
-using CookWizard.Domain.Entities;
-using CookWizard.Domain.Interfaces;
+using CookWizard.Domain.Interfaces.Repository;
 using MapsterMapper;
 using MediatR;
 

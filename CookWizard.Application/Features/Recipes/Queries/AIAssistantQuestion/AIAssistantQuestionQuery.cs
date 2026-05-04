@@ -1,6 +1,6 @@
 ﻿using CookWizard.Application.Common;
 using CookWizard.Domain.Entities;
-using CookWizard.Domain.Interfaces;
+using CookWizard.Domain.Interfaces.Repository;
 using MediatR;
 
 namespace CookWizard.Application.Features.Recipes.Queries;

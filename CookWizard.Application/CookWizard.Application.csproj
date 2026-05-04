@@ -17,4 +17,8 @@
     <ProjectReference Include="..\CookWizard.Domain\CookWizard.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Users\Queries\" />
+  </ItemGroup>
+
 </Project>

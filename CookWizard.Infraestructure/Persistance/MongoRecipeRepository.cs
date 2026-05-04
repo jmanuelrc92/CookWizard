@@ -1,5 +1,5 @@
 ﻿using CookWizard.Domain.Entities;
-using CookWizard.Domain.Interfaces;
+using CookWizard.Domain.Interfaces.Repository;
 using CookWizard.Infrastructure.Common.Settings;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -77,4 +77,63 @@ public class MongoRecipeRepository : IRecipeRepository
     {
         await _recipes.DeleteOneAsync(r => r.Id == id);
     }
+
+    public async Task<(IEnumerable<Recipe>, long)> SearchAsync(
+        int page,
+        int size,
+        List<string>? ingredients,
+        string? difficulty,
+        int? maxTime,
+        int? minPortions
+    )
+    {
+        var builder = Builders<Recipe>.Filter;
+        var filter = builder.Empty;
+
+        // Productos (nested: Sections -> Ingredients)
+        if (ingredients != null && ingredients.Any())
+        {
+            var normalized = ingredients.Select(p => p.ToLower()).ToList();
+
+            var productFilter = builder.ElemMatch(
+                r => r.Sections,
+                s => s.Ingredients.Any(i => normalized.Contains(i.Product))
+            );
+
+            filter &= productFilter;
+        }
+
+        // Difficulty
+        if (!string.IsNullOrWhiteSpace(difficulty))
+        {
+            if (Enum.TryParse<Difficulty>(difficulty, true, out var diffEnum))
+            {
+                filter &= builder.Eq(r => r.Difficulty, diffEnum);
+            }
+        }
+
+        // Tiempo
+        if (maxTime.HasValue)
+        {
+            filter &= builder.Lte(r => r.TotalTimeInSeconds, maxTime.Value);
+        }
+
+        // Porciones
+        if (minPortions.HasValue)
+        {
+            filter &= builder.Gte(r => r.Portions, minPortions.Value);
+        }
+
+        var totalTask = _recipes.CountDocumentsAsync(filter);
+
+        var itemsTask = _recipes.Find(filter)
+            .Skip((page - 1) * size)
+            .Limit(size)
+            .ToListAsync();
+
+        await Task.WhenAll(totalTask, itemsTask);
+
+        return (itemsTask.Result, totalTask.Result);
+    }
+
 }

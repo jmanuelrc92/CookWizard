@@ -1,6 +1,7 @@
 ﻿using CookWizard.Application.Common.DTOs;
 using CookWizard.Application.Features.Recipes.Commands;
 using CookWizard.Application.Features.Recipes.Queries;
+using CookWizard.Application.Features.Recipes.Queries.SearchRecipes;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,14 +18,14 @@ public class RecipesController : ApiController
     }
 
     [HttpPost]
-    public async Task<ActionResult<Guid>> Create(CreateRecipeCommand command)
+    public async Task<ActionResult<Guid>> CreateRecipe(CreateRecipeCommand command)
     {
         var result = await _mediator.Send(command);
         return HandleResult<string>(result);
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedResult<RecipeDTO>>> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<PagedResult<RecipeDTO>>> GetRecipes([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var query = new GetRecipesQuery(pageNumber, pageSize);
         var result = await _mediator.Send(query);
@@ -47,6 +48,29 @@ public class RecipesController : ApiController
         var result = await _mediator.Send(query);
 
         return HandleResult<IEnumerable<RecipeDTO>>(result);
+    }
+
+    [HttpGet("search")]
+    public async Task<ActionResult<PagedResult<RecipeDTO>>> Search(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] List<string>? products = null,
+        [FromQuery] string? difficulty = null,
+        [FromQuery] int? maxTime = null,
+        [FromQuery] int? minPortions = null
+    )
+    {
+        var query = new SearchRecipesQuery(
+            pageNumber,
+            pageSize,
+            products,
+            difficulty,
+            maxTime,
+            minPortions
+        );
+
+        var result = await _mediator.Send(query);
+        return HandleResult(result);
     }
 
 }

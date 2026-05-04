@@ -1,4 +1,4 @@
-﻿using CookWizard.Domain.Interfaces;
+﻿using CookWizard.Domain.Interfaces.Repository;
 using CookWizard.Infraestructure.Persistance;
 using CookWizard.Infrastructure.Common.Settings;
 using Microsoft.Extensions.Configuration;
