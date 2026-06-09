@@ -2,6 +2,7 @@
 using CookWizard.Domain.Interfaces.Repository;
 using CookWizard.Infrastructure.Common.Settings;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace CookWizard.Infraestructure.Persistance;
@@ -21,10 +22,22 @@ public class MongoRecipeRepository : IRecipeRepository
 
     private IMongoDatabase _ConfigureServerConnection()
     {
-        var connectionString = $"mongodb://{_options.User}:{_options.Password}@localhost:{_options.Port}/myDatabase";
-        var client = new MongoClient(connectionString);
+        string connectionUri = $"mongodb+srv://{_options.User}:{_options.Password}@{_options.Server}/?appName={_options.AppName}";
         
-        return client.GetDatabase("CookWizardDb");
+        var settings = MongoClientSettings.FromConnectionString(connectionUri);
+        settings.ServerApi = new ServerApi(ServerApiVersion.V1);
+        
+        var client = new MongoClient(settings);
+        try
+        {
+            var result = client.GetDatabase("admin").RunCommand<BsonDocument>(new BsonDocument("ping", 1));
+            // todo, report a correct ping
+        }
+        catch(Exception ex)
+        {
+            //Todo exception report
+        }
+        return client.GetDatabase("CookWizard");
     }
 
     public async Task<string> CreateAsync(Recipe recipe)

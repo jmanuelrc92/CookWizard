@@ -19,6 +19,8 @@ public class MongoSettings
     public string User { get; set; } = string.Empty;
     [Required(ErrorMessage = "The password is not set.")]
     public string Password { get; set; } = string.Empty;
+    [Required(ErrorMessage = "AppName is not set.")]
+    public string AppName { get; set; } = string.Empty;
     [Required(ErrorMessage = "Collections are required.")]
     public required MongoCollectionSettings[] Collections { get; set; }
 }

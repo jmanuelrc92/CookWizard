@@ -1,5 +1,8 @@
+using Carter;
 using CookWizard.Application.Extensions;
+using CookWizard.Application.Users.CreateUser;
 using CookWizard.Infraestructure.Extensions;
+using Wolverine;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
 //dependency injection
 builder.Services.AddApplication();
 builder.Services.AddInfraestructure(builder.Configuration);
@@ -20,6 +24,14 @@ builder.Services.AddCors(options =>
         .AllowAnyHeader();
     });
 });
+
+builder.Host.UseWolverine(opts =>
+{
+    opts.Discovery.IncludeAssembly(typeof(CreateUserHandler).Assembly);
+    opts.UseRuntimeCompilation();
+});
+
+builder.Services.AddCarter();
 
 var app = builder.Build();
 
@@ -36,5 +48,7 @@ app.UseCors("AllowAllOrigin");
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapCarter();
 
 app.Run();

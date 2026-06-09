@@ -7,18 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Users\Queries\**" />
+    <EmbeddedResource Remove="Users\Queries\**" />
+    <None Remove="Users\Queries\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Mapster" Version="10.0.7" />
     <PackageReference Include="Mapster.DependencyInjection" Version="10.0.7" />
-    <PackageReference Include="MediatR" Version="14.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.6" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CookWizard.Domain\CookWizard.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Features\Users\Queries\" />
   </ItemGroup>
 
 </Project>
