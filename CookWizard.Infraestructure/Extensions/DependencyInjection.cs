@@ -1,9 +1,12 @@
 ﻿using CookWizard.Domain.Auth.Repository;
 using CookWizard.Domain.Auth.Services;
+using CookWizard.Domain.Recipes.Models;
+using CookWizard.Domain.Recipes.Repository;
 using CookWizard.Domain.Users.Repository;
 using CookWizard.Infrastructure.Auth.Persistance;
 using CookWizard.Infrastructure.Auth.Services;
 using CookWizard.Infrastructure.Common.Settings;
+using CookWizard.Infrastructure.Recipes.Persistance;
 using CookWizard.Infrastructure.Users.Persistance;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +16,8 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
+using System;
+using System.Reflection;
 
 namespace CookWizard.Infraestructure.Extensions;
 
@@ -23,12 +28,12 @@ public static class DependencyInjection
         IConfiguration configuration
     )
     {
+        _ConfigureMongoDbSerialization();
+
         services.AddOptions<JWTSettings>()
             .Bind(configuration.GetSection("JWT"))
             .ValidateDataAnnotations()
             .ValidateOnStart();
-
-        _ConfigureMongoDbSerialization();
 
         services.AddOptions<MongoSettings>()
             .Bind(configuration.GetSection("MongoDB"))
@@ -47,7 +52,7 @@ public static class DependencyInjection
             return new MongoClient(settings);
         });
 
-        //services.AddScoped<IRecipeRepository, MongoRecipeRepository>();
+        services.AddScoped<IRecipeRepository, MongoRecipeRepository>();
         services.AddScoped<IUserRepository, MongoUserRepository>();
         services.AddScoped<IUserCredentialsRepository, MongoUserCredentialsRepository>();
 
@@ -70,6 +75,49 @@ public static class DependencyInjection
         };
 
         ConventionRegistry.Register("CookWizardConventions", conventionPack, t => true);
-    }
 
+        if (!BsonClassMap.IsClassMapRegistered(typeof(Recipe)))
+        {
+            BsonClassMap.RegisterClassMap<Recipe>(cm =>
+            {
+                cm.AutoMap();
+                cm.MapIdProperty(r => r.Id);
+                cm.MapField("_sections").SetElementName("sections");
+                cm.UnmapProperty(r => r.Sections);
+                cm.MapProperty(r => r.CreatedAt);
+                cm.MapCreator(() => (Recipe)Activator.CreateInstance(typeof(Recipe), true));
+            });
+        }
+
+        if (!BsonClassMap.IsClassMapRegistered(typeof(Section)))
+        {
+            BsonClassMap.RegisterClassMap<Section>(cm =>
+            {
+                cm.AutoMap();
+                cm.MapField("_ingredients").SetElementName("ingredients");
+                cm.UnmapProperty(s => s.Ingredients);
+                cm.MapField("_steps").SetElementName("steps");
+                cm.UnmapProperty(s => s.Steps);
+                cm.MapCreator(() => (Section)Activator.CreateInstance(typeof(Section), true));
+            });
+        }
+
+        if (!BsonClassMap.IsClassMapRegistered(typeof(Ingredient)))
+        {
+            BsonClassMap.RegisterClassMap<Ingredient>(cm =>
+            {
+                cm.AutoMap();
+                cm.MapCreator(() => (Ingredient)Activator.CreateInstance(typeof(Ingredient), true));
+            });
+        }
+
+        if (!BsonClassMap.IsClassMapRegistered(typeof(PreparationStep)))
+        {
+            BsonClassMap.RegisterClassMap<PreparationStep>(cm =>
+            {
+                cm.AutoMap();
+                cm.MapCreator(() => (PreparationStep)Activator.CreateInstance(typeof(PreparationStep), true));
+            });
+        }
+    }
 }

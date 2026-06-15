@@ -1,7 +1,6 @@
 ﻿using Carter;
-using CookWizard.Application.Features.Recipes.Commands;
-using CookWizard.Application.Features.Recipes.Queries;
-using Microsoft.AspNetCore.Mvc;
+using CookWizard.Application.Recipes.CreateRecipe;
+using Wolverine;
 
 namespace CookWizard.Api.Recipes;
 
@@ -15,10 +14,10 @@ public class RecipesModule : ICarterModule
         recipesGroup.MapGet("/recipes/{id}", GetRecipe);
     }
 
-    private static async Task<IResult> CreateRecipe()
+    private static async Task<IResult> CreateRecipe(CreateRecipeCommand command, IMessageBus bus)
     {
-        //var result = await mediator.Send(createRecipe);
-        return Results.Ok();
+        var result = await bus.InvokeAsync<CreateRecipeResponse>(command);
+        return Results.Ok(result);
     }
 
     private static async Task<IResult> GetRecipe(string id)

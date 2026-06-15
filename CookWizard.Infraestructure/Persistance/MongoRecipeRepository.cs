@@ -1,5 +1,6 @@
 ﻿using CookWizard.Domain.Entities;
 using CookWizard.Domain.Interfaces.Repository;
+using CookWizard.Domain.Recipes.Models;
 using CookWizard.Infrastructure.Common.Settings;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;

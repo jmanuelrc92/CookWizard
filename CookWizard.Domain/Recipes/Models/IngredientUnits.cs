@@ -1,4 +1,4 @@
-﻿namespace CookWizard.Domain.Entities;
+﻿namespace CookWizard.Domain.Recipes.Models;
 
 public enum Unit
 {

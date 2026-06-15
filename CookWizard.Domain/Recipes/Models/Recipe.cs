@@ -1,15 +1,17 @@
-﻿namespace CookWizard.Domain.Entities;
+﻿namespace CookWizard.Domain.Recipes.Models;
+
 public class Recipe
 {
-    public string Id { get; private set; }
-    public string Name { get; private set; }
-    public int Portions { get; private set; }
-    public int TotalTimeInSeconds { get; private set; }
-    public Difficulty Difficulty { get; private set; }
+    public string Id { get; set; }
+    public string Name { get; set; }
+    public int Portions { get; set; }
+    public int TotalTimeInSeconds { get; set; }
+    public Difficulty Difficulty { get; set; }
     private readonly List<Section> _sections = new();
     public IReadOnlyCollection<Section> Sections => _sections;
-    
-    private Recipe() { } // Mongo
+    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
+
+    private Recipe() { }
 
     public Recipe(string name, int portions, int totalTimeInSeconds, Difficulty difficulty)
     {
@@ -18,8 +20,6 @@ public class Recipe
 
         if (portions <= 0)
             throw new ArgumentException("Portions must be greater than 0");
-
-
 
         this.Id = Guid.NewGuid().ToString();
         this.Name = name;

@@ -1,4 +1,4 @@
-﻿namespace CookWizard.Domain.Entities;
+﻿namespace CookWizard.Domain.Recipes.Models;
 
 public class Section
 {
@@ -25,7 +25,7 @@ public class Section
         if (ingredient == null)
             throw new ArgumentNullException(nameof(ingredient));
 
-        if (this._ingredients.Any(i => i.Product == ingredient.Product && i.Unit == ingredient.Unit))
+        if (this._ingredients.Any(i => i.Product == ingredient.Product && i.Unit == ingredient.Unit && i.Notes == ingredient.Notes))
             throw new InvalidOperationException("Ingredient already exists in section");
 
         this._ingredients.Add(ingredient);
