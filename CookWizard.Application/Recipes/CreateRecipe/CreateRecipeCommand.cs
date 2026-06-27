@@ -1,5 +1,4 @@
-﻿using CookWizard.Application.Features.Recipes.Commands;
-
+﻿
 namespace CookWizard.Application.Recipes.CreateRecipe;
 
 public record CreateRecipeCommand(

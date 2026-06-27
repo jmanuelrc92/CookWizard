@@ -26,4 +26,10 @@ public class MongoRecipeRepository : IRecipeRepository
         await _recipes.InsertOneAsync(recipe);
         return recipe.Id;
     }
+
+    public async Task<Recipe?> GetByIdAsync(string id)
+    {
+        return await _recipes.Find(r => r.Id == id)
+            .FirstOrDefaultAsync();
+    }
 }

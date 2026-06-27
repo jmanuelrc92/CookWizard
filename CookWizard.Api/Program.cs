@@ -29,6 +29,8 @@ builder.Host.UseWolverine(opts =>
 {
     opts.Discovery.IncludeAssembly(typeof(CreateUserHandler).Assembly);
     opts.UseRuntimeCompilation();
+
+    opts.CodeGeneration.AlwaysUseServiceLocationFor<MapsterMapper.IMapper>();
 });
 
 builder.Services.AddCarter();

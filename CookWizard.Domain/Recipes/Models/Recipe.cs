@@ -7,7 +7,7 @@ public class Recipe
     public int Portions { get; set; }
     public int TotalTimeInSeconds { get; set; }
     public Difficulty Difficulty { get; set; }
-    private readonly List<Section> _sections = new();
+    private List<Section> _sections = new();
     public IReadOnlyCollection<Section> Sections => _sections;
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 

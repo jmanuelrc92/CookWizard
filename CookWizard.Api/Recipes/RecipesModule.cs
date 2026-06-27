@@ -1,5 +1,6 @@
 ﻿using Carter;
 using CookWizard.Application.Recipes.CreateRecipe;
+using CookWizard.Application.Recipes.GetRecipe;
 using Wolverine;
 
 namespace CookWizard.Api.Recipes;
@@ -20,13 +21,9 @@ public class RecipesModule : ICarterModule
         return Results.Ok(result);
     }
 
-    private static async Task<IResult> GetRecipe(string id)
+    private static async Task<IResult> GetRecipe(string id, IMessageBus bus)
     {
-        /*
-        var query = new GetRecipeByIdQuery(id);
-        var result = await mediator.Send(query);
+        var result = await bus.InvokeAsync<GetRecipeResponse>(new GetRecipeQuery(id));
         return Results.Ok(result);
-        */
-        return Results.Ok();
     }
 }

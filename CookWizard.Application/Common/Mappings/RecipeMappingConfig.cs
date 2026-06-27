@@ -1,6 +1,5 @@
-﻿using CookWizard.Application.Common.DTOs;
-using CookWizard.Application.Features.Recipes.Commands;
-using CookWizard.Domain.Entities;
+﻿using CookWizard.Application.Recipes.GetRecipe;
+using CookWizard.Domain.Recipes.Models;
 using Mapster;
 
 namespace CookWizard.Application.Common.Mappings;
@@ -9,14 +8,20 @@ public static class RecipeMappingConfig
 {
     public static void RegisterMappings()
     {
-        TypeAdapterConfig<Recipe, RecipeDTO>
+        TypeAdapterConfig<Recipe, GetRecipeResponse>
             .NewConfig()
             .Map(dest => dest.Difficulty, src => src.Difficulty.ToString());
 
-        TypeAdapterConfig<Section, SectionDTO>.NewConfig();
-        TypeAdapterConfig<Ingredient, IngredientDTO>.NewConfig();
-        TypeAdapterConfig<PreparationStep, PreparationStepDTO>
+        TypeAdapterConfig<Section, GetRecipeSectionResponse>
+            .NewConfig();
+
+        TypeAdapterConfig<Ingredient, GetRecipeIngredientResponse>
             .NewConfig()
-            .Map(dest => dest.Description, src => src.Description);
+            .Map(dest => dest.RawIngredient, src => src.Raw);
+
+        TypeAdapterConfig<PreparationStep, GetRecipeStepsResponse>
+            .NewConfig()
+            .Map(dest => dest.Order, src => src.Order)
+            .Map(dest => dest.Instructions, src => src.Description);
     }
 }

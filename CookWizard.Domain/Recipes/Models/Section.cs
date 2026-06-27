@@ -4,10 +4,10 @@ public class Section
 {
     public string Name { get; private set; }
 
-    private readonly List<Ingredient> _ingredients = new();
+    private List<Ingredient> _ingredients = new();
     public IReadOnlyCollection<Ingredient> Ingredients => this._ingredients;
 
-    private readonly List<PreparationStep> _steps = new();
+    private List<PreparationStep> _steps = new();
     public IReadOnlyCollection<PreparationStep> Steps => this._steps;
 
     private Section() { }
