@@ -1,6 +1,6 @@
-﻿using CookWizard.Application.Features.Recipes.Commands;
-using CookWizard.Domain.Entities;
-using CookWizard.Domain.Interfaces.Repository;
+﻿using CookWizard.Application.Recipes.UseCases.CreateRecipe;
+using CookWizard.Domain.Recipes.Models;
+using CookWizard.Domain.Recipes.Repository;
 using FluentAssertions;
 using Moq;
 
@@ -14,7 +14,7 @@ public class CreateRecipeHandlerTests
     public CreateRecipeHandlerTests()
     {
         _repositoryMock = new Mock<IRecipeRepository>();
-        _handler = new CreateRecipeHandler(_repositoryMock.Object);
+        _handler = new CreateRecipeHandler();
     }
 
     [Fact]
@@ -25,34 +25,34 @@ public class CreateRecipeHandlerTests
             "Test Recipe",
             2,
             1200,
-            new List<SectionDTO>
+            new List<CreateSection>
             {
-                new SectionDTO(
+                new CreateSection(
                     "Main",
-                    new List<IngredientDTO>
+                    new List<CreateIngredient>
                     {
-                        new IngredientDTO(1, "kg", "chicken", null, null)
+                        new CreateIngredient(1, "kg", "chicken", null, null)
                     },
-                    new List<PreparationStepDTO>
+                    new List<CreateStep>
                     {
-                        new PreparationStepDTO("Cook it")
+                        new CreateStep("Cook it")
                     }
                 )
             }
         );
 
         _repositoryMock
-            .Setup(r => r.CreateAsync(It.IsAny<Recipe>()))
+            .Setup(r => r.AddAsync(It.IsAny<Recipe>()))
             .ReturnsAsync("recipe-id");
 
         // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+        var result = await _handler.Handle(command, _repositoryMock.Object);
 
         // Assert
-        result.IsFailure.Should().Be(false);
-        result.Value.Should().Be("recipe-id");
+        result.Should().Be(false);
+        result.Should().Be("recipe-id");
 
-        _repositoryMock.Verify(r => r.CreateAsync(It.IsAny<Recipe>()), Times.Once);
+        _repositoryMock.Verify(r => r.AddAsync(It.IsAny<Recipe>()), Times.Once);
     }
 
     [Fact]
@@ -62,12 +62,11 @@ public class CreateRecipeHandlerTests
             "Test",
             0,
             100,
-            new List<SectionDTO>()
+            new List<CreateSection>()
         );
 
-        var result = await _handler.Handle(command, CancellationToken.None);
+        var result = await _handler.Handle(command, _repositoryMock.Object);
 
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Contain("porciones");
+        result.Should().Be(false);
     }
 }

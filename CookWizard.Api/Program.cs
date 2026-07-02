@@ -2,18 +2,17 @@ using Carter;
 using CookWizard.Application.Extensions;
 using CookWizard.Application.Users.CreateUser;
 using CookWizard.Infraestructure.Extensions;
+using CookWizard.Infrastructure.Common.Settings;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using Wolverine;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-
-//dependency injection
-builder.Services.AddApplication();
-builder.Services.AddInfraestructure(builder.Configuration);
 
 builder.Services.AddCors(options =>
 {
@@ -33,7 +32,35 @@ builder.Host.UseWolverine(opts =>
     opts.CodeGeneration.AlwaysUseServiceLocationFor<MapsterMapper.IMapper>();
 });
 
+//dependency injection
+builder.Services.AddApplication();
+builder.Services.AddInfraestructure(builder.Configuration);
+
 builder.Services.AddCarter();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer();
+
+builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+    .Configure<IOptions<JwtSettings>>((options, jwtOptions) =>
+    {
+        var jwt = jwtOptions.Value;
+        options.TokenValidationParameters = new()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = jwt.Issuer,
+            ValidAudience = jwt.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwt.SecretKey)
+            )
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -47,9 +74,9 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowAllOrigin");
 
-app.UseAuthorization();
+app.UseAuthentication();
 
-app.MapControllers();
+app.UseAuthorization();
 
 app.MapCarter();
 

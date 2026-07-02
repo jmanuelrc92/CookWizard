@@ -28,7 +28,7 @@ public static class DependencyInjection
     {
         _ConfigureMongoDbSerialization();
 
-        services.AddOptions<JWTSettings>()
+        services.AddOptions<JwtSettings>()
             .Bind(configuration.GetSection("JWT"))
             .ValidateDataAnnotations()
             .ValidateOnStart();

@@ -1,6 +1,6 @@
 ﻿namespace CookWizard.Infrastructure.Common.Settings;
 
-public class JWTSettings
+public class JwtSettings
 {
     public string SecretKey { get; set; } = string.Empty;
     public string Issuer { get; set; } = string.Empty;

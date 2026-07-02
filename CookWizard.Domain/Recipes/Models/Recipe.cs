@@ -6,14 +6,13 @@ public class Recipe
     public string Name { get; set; }
     public int Portions { get; set; }
     public int TotalTimeInSeconds { get; set; }
-    public Difficulty Difficulty { get; set; }
     private List<Section> _sections = new();
     public IReadOnlyCollection<Section> Sections => _sections;
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 
     private Recipe() { }
 
-    public Recipe(string name, int portions, int totalTimeInSeconds, Difficulty difficulty)
+    public Recipe(string name, int portions, int totalTimeInSeconds)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Name is required");
@@ -24,7 +23,6 @@ public class Recipe
         this.Id = Guid.NewGuid().ToString();
         this.Name = name;
         this.Portions = portions;
-        this.Difficulty = difficulty;
         this.TotalTimeInSeconds = totalTimeInSeconds;
     }
 

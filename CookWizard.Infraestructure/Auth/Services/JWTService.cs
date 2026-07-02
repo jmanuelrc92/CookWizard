@@ -11,10 +11,10 @@ namespace CookWizard.Infrastructure.Auth.Services;
 
 public class JwtService : IJWTService
 {
-    private readonly JWTSettings _config;
+    private readonly JwtSettings _config;
 
     public JwtService(
-        IOptions<JWTSettings> options
+        IOptions<JwtSettings> options
     )
     {
         _config = options.Value;

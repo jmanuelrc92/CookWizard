@@ -1,4 +1,4 @@
-﻿using CookWizard.Application.Common.Mappings;
+﻿using CookWizard.Application.Recipes.Mappings;
 using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
