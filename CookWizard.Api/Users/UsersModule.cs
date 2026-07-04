@@ -1,5 +1,6 @@
 ﻿using Carter;
-using CookWizard.Application.Users.CreateUser;
+using CookWizard.Application.Users.UseCases.CreateUser;
+using CookWizard.Application.Users.UseCases.GetUserInfo;
 using Wolverine;
 
 namespace CookWizard.Api.Users;
@@ -11,11 +12,19 @@ public class UsersModule : ICarterModule
         var usersGroup = app.MapGroup("/api");
 
         usersGroup.MapPost("/users", CreateUser);
+        usersGroup.MapPost("users/me", GetUserInfo)
+            .RequireAuthorization();
     }
 
     private static async Task<IResult> CreateUser(CreateUserCommand command, IMessageBus bus)
     {
         var result = await bus.InvokeAsync<CreateUserResponse>(command);
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> GetUserInfo(GetUserInfoQuery query, IMessageBus bus)
+    {
+        var result = await bus.InvokeAsync<GetUserInfoResponse>(query);
         return Results.Ok(result);
     }
 }

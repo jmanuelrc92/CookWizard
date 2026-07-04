@@ -26,5 +26,6 @@ public class User
         FirstName = firstName;
         LastName = lastName;
         Birthday = birthday;
+        CreatedAt = DateTime.UtcNow;
     }
 }

@@ -31,4 +31,10 @@ public class MongoUserRepository : IUserRepository
             .Find(x => x.Email == email)
             .AnyAsync();
     }
+
+    public async Task<User> GetByIdAsync(string guid)
+    {
+        return await _users.Find(u => u.Id == guid)
+            .FirstOrDefaultAsync();
+    }
 }

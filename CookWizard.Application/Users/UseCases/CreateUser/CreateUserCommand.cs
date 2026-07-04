@@ -1,4 +1,4 @@
-﻿namespace CookWizard.Application.Users.CreateUser;
+﻿namespace CookWizard.Application.Users.UseCases.CreateUser;
 
 public record CreateUserCommand(
     string FirstName,

@@ -4,7 +4,7 @@ using CookWizard.Domain.Auth.Services;
 using CookWizard.Domain.Users.Models;
 using CookWizard.Domain.Users.Repository;
 
-namespace CookWizard.Application.Users.CreateUser;
+namespace CookWizard.Application.Users.UseCases.CreateUser;
 
 public class CreateUserHandler
 {

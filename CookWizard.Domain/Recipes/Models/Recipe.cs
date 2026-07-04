@@ -24,6 +24,7 @@ public class Recipe
         this.Name = name;
         this.Portions = portions;
         this.TotalTimeInSeconds = totalTimeInSeconds;
+        this.CreatedAt = DateTime.UtcNow;
     }
 
     public void AddSection(Section section)

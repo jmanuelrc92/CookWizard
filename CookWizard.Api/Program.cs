@@ -1,6 +1,6 @@
 using Carter;
 using CookWizard.Application.Extensions;
-using CookWizard.Application.Users.CreateUser;
+using CookWizard.Application.Users.UseCases.CreateUser;
 using CookWizard.Infraestructure.Extensions;
 using CookWizard.Infrastructure.Common.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
