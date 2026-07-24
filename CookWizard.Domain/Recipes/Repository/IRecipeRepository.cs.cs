@@ -6,4 +6,5 @@ public interface IRecipeRepository
 {
     Task<string> AddAsync(Recipe recipe);
     Task<Recipe?> GetByIdAsync(string id);
+    Task<RecipeSearchResult> SearchAsync(RecipeSearchCriteria criteria);
 }

@@ -1,6 +1,7 @@
 ﻿using Carter;
 using CookWizard.Application.Recipes.UseCases.CreateRecipe;
 using CookWizard.Application.Recipes.UseCases.GetRecipe;
+using CookWizard.Application.Recipes.UseCases.SearchRecipes;
 using Wolverine;
 
 namespace CookWizard.Api.Recipes;
@@ -12,6 +13,8 @@ public class RecipesModule : ICarterModule
         var recipesGroup = app.MapGroup("/api");
 
         recipesGroup.MapPost("/recipes", CreateRecipe)
+            .RequireAuthorization();
+        recipesGroup.MapPost("/recipes/search", SearchRecipes)
             .RequireAuthorization();
         recipesGroup.MapGet("/recipes/{id}", GetRecipe)
             .RequireAuthorization();
@@ -26,6 +29,12 @@ public class RecipesModule : ICarterModule
     private static async Task<IResult> GetRecipe(string id, IMessageBus bus)
     {
         var result = await bus.InvokeAsync<GetRecipeResponse>(new GetRecipeQuery(id));
+        return Results.Ok(result);
+    }
+
+    private static async Task<IResult> SearchRecipes(SearchRecipesQuery query, IMessageBus bus)
+    {
+        var result = await bus.InvokeAsync<SearchRecipesResponse>(query);
         return Results.Ok(result);
     }
 }
