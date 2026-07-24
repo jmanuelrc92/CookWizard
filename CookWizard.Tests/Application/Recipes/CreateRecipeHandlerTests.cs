@@ -31,7 +31,7 @@ public class CreateRecipeHandlerTests
                     "Main",
                     new List<CreateIngredient>
                     {
-                        new CreateIngredient(1, "kg", "chicken", null, null)
+                        new CreateIngredient(1, "kg", "chicken", null, "1 kg chicken")
                     },
                     new List<CreateStep>
                     {
@@ -49,8 +49,10 @@ public class CreateRecipeHandlerTests
         var result = await _handler.Handle(command, _repositoryMock.Object);
 
         // Assert
-        result.Should().Be(false);
-        result.Should().Be("recipe-id");
+        result.Id.Should().Be("recipe-id");
+        result.Name.Should().Be("Test Recipe");
+        result.Portions.Should().Be(2);
+        result.TotalTimeInSeconds.Should().Be(1200);
 
         _repositoryMock.Verify(r => r.AddAsync(It.IsAny<Recipe>()), Times.Once);
     }
@@ -65,8 +67,11 @@ public class CreateRecipeHandlerTests
             new List<CreateSection>()
         );
 
-        var result = await _handler.Handle(command, _repositoryMock.Object);
+        var action = async () => await _handler.Handle(command, _repositoryMock.Object);
 
-        result.Should().Be(false);
+        await action.Should().ThrowAsync<ArgumentException>()
+            .WithMessage("Portions must be greater than 0");
+
+        _repositoryMock.Verify(r => r.AddAsync(It.IsAny<Recipe>()), Times.Never);
     }
 }
