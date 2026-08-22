@@ -1,0 +1,49 @@
+name: Trigger auto deployment for cook-wizard-api
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ develop ]
+    paths:
+    - '**'
+    - '.github/workflows/cook-wizard-api-AutoDeployTrigger-2d9ecc05-2e36-4878-bb61-45d748f16ec9.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write #This is required for requesting the OIDC JWT Token
+      contents: read #Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.COOKWIZARDAPI_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.COOKWIZARDAPI_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.COOKWIZARDAPI_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}
+          _dockerfilePathKey_: _dockerfilePath_
+          _targetLabelKey_: _targetLabel_
+          registryUrl: 
+          registryUsername: ${{ secrets.COOKWIZARDAPI_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.COOKWIZARDAPI_REGISTRY_PASSWORD }}
+          containerAppName: cook-wizard-api
+          resourceGroup: CookWizardTest
+          imageToBuild: default/[parameters('containerAppName')]:${{ github.sha }}
+          _buildArgumentsKey_: |
+            _buildArgumentsValues_
+
+
